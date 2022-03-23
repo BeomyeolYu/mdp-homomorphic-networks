@@ -16,16 +16,9 @@ class MinibatchRlBase(BaseRunner):
 
     _eval = False
 
-    def __init__(
-            self,
-            algo,
-            agent,
-            sampler,
-            n_steps,
-            seed=None,
-            affinity=None,
-            log_interval_steps=1e5,
-            ):
+    def __init__(self, algo, agent, sampler, n_steps,
+                 seed=None, affinity=None, 
+                 log_interval_steps=1e5,):
         n_steps = int(n_steps)
         log_interval_steps = int(log_interval_steps)
         affinity = dict() if affinity is None else affinity
@@ -182,8 +175,8 @@ class MinibatchRlBase(BaseRunner):
 
 
 class MinibatchRl(MinibatchRlBase):
-    """Runs RL on minibatches; tracks performance online using learning
-    trajectories."""
+    """Runs RL on minibatches; 
+       tracks performance online using learning trajectories."""
 
     def __init__(self, log_traj_window=100, **kwargs):
         super().__init__(**kwargs)

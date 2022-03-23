@@ -1,6 +1,6 @@
 """
-Adaptation of the Atari model class to suit CartPole-v1 and enable the use of
-basis networks.
+Adaptation of the Atari model class to suit CartPole-v1 
+and enable the use of basis networks.
 """
 
 import torch
@@ -9,21 +9,14 @@ import torch.nn.functional as F
 from rlpyt.utils.tensor import infer_leading_dims, restore_leading_dims
 from rlpyt.models.mlp import MlpModel
 
-from symmetrizer.nn import BasisCartpoleNetworkWrapper, BasisCartpoleLayer, \
-    BasisLinear
+from symmetrizer.nn import BasisCartpoleNetworkWrapper, \
+                           BasisCartpoleLayer, BasisLinear
 
 
 class CartpoleFfModel(torch.nn.Module):
-
-    def __init__(
-            self,
-            image_shape,
-            output_size,
-            fc_sizes=[64, 64],
-            basis=None,
-            gain_type="xavier",
-            out=None,
-            ):
+    def __init__(self, image_shape, output_size,
+                 fc_sizes=[64, 64],
+                 basis=None, gain_type="xavier", out=None):
         super().__init__()
 
         input_size = image_shape[0]
@@ -65,29 +58,22 @@ def weight_init(layer):
 
 
 class CartpoleBasisModel(torch.nn.Module):
-
-    def __init__(
-            self,
-            image_shape,
-            output_size,
-            fc_sizes=[45, 45],
-            basis="equivariant",
-            gain_type="default",
-            ):
+    def __init__(self, image_shape, output_size,
+                 fc_sizes=[45, 45],
+                 basis="equivariant", gain_type="default"):
         super(CartpoleBasisModel, self).__init__()
         input_size = image_shape[0]
         input_size = 1
 
-
         self.head = BasisCartpoleNetworkWrapper(input_size, fc_sizes,
-                                             gain_type=gain_type,
-                                             basis=basis)
+                                                gain_type=gain_type,
+                                                basis=basis)
         self.pi = BasisCartpoleLayer(fc_sizes[-1], 1,
-                                         gain_type=gain_type,
-                                         basis=basis)
+                                     gain_type=gain_type,
+                                     basis=basis)
         self.value = BasisCartpoleLayer(fc_sizes[-1], 1,
-                                            gain_type=gain_type,
-                                            basis=basis, out="invariant")
+                                        gain_type=gain_type,
+                                        basis=basis, out="invariant")
 
     def forward(self, in_state, prev_action, prev_reward):
         """Feedforward layers process as [T*B,H]. Return same leading dims as
@@ -104,4 +90,3 @@ class CartpoleBasisModel(torch.nn.Module):
         # Restore leading dimensions: [T,B], [B], or [], as input.
         pi, v = restore_leading_dims((pi, v), lead_dim, T, B)
         return pi, v
-

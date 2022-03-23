@@ -33,17 +33,14 @@ def build_and_train(env_id="CartPole-v1", run_ID=0, cuda_idx=None,
         affinity["alternating"] = True  # Sampler will check for this.
         print(f"Using Alternating GPU parallel sampler, {gpu_cpu} for sampling and optimizing.")
 
-
-    sampler = Sampler(
-        EnvCls=gym_make,
-        env_kwargs=dict(id=env_id),
-        eval_env_kwargs=dict(id=env_id),
-        batch_T=5,  # 5 time-steps per sampler iteration.
-        batch_B=16,  # 16 parallel environments.
-        max_decorrelation_steps=400,
-        eval_n_envs=25,
-        eval_max_steps=12500
-    )
+    sampler = Sampler(EnvCls=gym_make,
+                      env_kwargs=dict(id=env_id),
+                      eval_env_kwargs=dict(id=env_id),
+                      batch_T=5,  # 5 time-steps per sampler iteration.
+                      batch_B=16, # 16 parallel environments.
+                      max_decorrelation_steps=400,
+                      eval_n_envs=25,
+                      eval_max_steps=12500)
 
     algo = PPO(learning_rate=args.lr)
 
@@ -52,19 +49,20 @@ def build_and_train(env_id="CartPole-v1", run_ID=0, cuda_idx=None,
     agent = agentCls(model_kwargs={'fc_sizes': args.fcs,
                                    'gain_type': args.gain_type,
                                    'basis': agent_basis})
-    runner = MinibatchRlEval(
-        algo=algo,
-        agent=agent,
-        sampler=sampler,
-        n_steps=1e5,
-        log_interval_steps=5e2,
-        affinity=affinity,
-    )
 
+    runner = MinibatchRlEval(algo=algo,
+                             agent=agent,
+                             sampler=sampler,
+                             n_steps=1e5,
+                             log_interval_steps=5e2,
+                             affinity=affinity)
 
-    config = dict(env_id=env_id, lr=args.lr,
-                  gain_type=args.gain_type, debug=False,
-                  network=args.network, fcs=str(args.fcs))
+    config = dict(env_id=env_id, 
+                  lr=args.lr,
+                  gain_type=args.gain_type, 
+                  debug=False,
+                  network=args.network, 
+                  fcs=str(args.fcs))
 
     name = f"{args.folder}_{args.network}"
     log_dir = f"{args.folder}_{args.network}"
@@ -75,27 +73,21 @@ def build_and_train(env_id="CartPole-v1", run_ID=0, cuda_idx=None,
 if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument('--folder', help='Folder to store results',
-                        default='CartpoleExperiment')
+    parser.add_argument('--folder', help='Folder to store results', default='CartpoleExperiment')
     parser.add_argument('--env_id', help='Gym', default='CartPole-v1')
     parser.add_argument('--lr', help='Learning rate', default=0.001, type=float)
-    parser.add_argument('--network', help='network type',
-                        default='equivariant', type=str)
-    parser.add_argument('--gain_type', type=str, default='xavier',
-                        help='Gain type [xavier, he]')
+    parser.add_argument('--network', help='network type', default='equivariant', type=str)
+    parser.add_argument('--gain_type', type=str, default='xavier', help='Gain type [xavier, he]')
     parser.add_argument('--fcs', type=int, nargs='+', default=[64, 64])
-
     parser.add_argument('--run_ID', help='run identifier (logging)', type=int, default=0)
-    parser.add_argument('--cuda_idx', help='gpu to use ', type=int, default=None)
+    parser.add_argument('--cuda_idx', help='gpu to use', type=int, default=None)
     parser.add_argument('--sample_mode', help='serial or parallel sampling',
                         type=str, default='serial', choices=['serial', 'cpu', 'gpu', 'alternating'])
-    parser.add_argument('--n_parallel', help='number of sampler workers',
-                        type=int, default=2)
+    parser.add_argument('--n_parallel', help='number of sampler workers', type=int, default=2)
     args = parser.parse_args()
-    build_and_train(
-        env_id=args.env_id,
-        run_ID=args.run_ID,
-        cuda_idx=args.cuda_idx,
-        sample_mode=args.sample_mode,
-        n_parallel=args.n_parallel, args=args
-    )
+    build_and_train(env_id=args.env_id,
+                    run_ID=args.run_ID,
+                    cuda_idx=args.cuda_idx,
+                    sample_mode=args.sample_mode,
+                    n_parallel=args.n_parallel, 
+                    args=args)
